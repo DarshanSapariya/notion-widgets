@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>winter countdown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--blush:#F8E6E8;--petal:#EBC3C9;--rose:#C9848F;--ink:#6E5258;--muted:#A88E93;--sage:#8FA58C;--cream:#FFFBF8}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:transparent;font-family:Inter,system-ui,sans-serif;color:var(--ink)}
+  .card{position:relative;height:100%;min-height:200px;border-radius:18px;overflow:hidden;
+    background:linear-gradient(160deg,#FCF2F1 0%,var(--blush) 55%,#F3DADD 100%);
+    border:1px solid #F1D9DC;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:18px 16px}
+  canvas{position:absolute;inset:0;pointer-events:none}
+  .date{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);position:relative}
+  .big{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(44px,15vw,64px);line-height:1;margin:8px 0 0;color:var(--rose);position:relative}
+  .label{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(16px,5.2vw,20px);margin-top:2px;position:relative}
+  .rule{width:42px;height:1px;background:var(--petal);margin:12px auto 10px;position:relative}
+  .nudge{font-size:12.5px;line-height:1.45;color:var(--ink);max-width:260px;position:relative}
+  .nudge b{display:block;font-weight:500;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--sage);margin-bottom:3px}
+</style></head>
+<body>
+<div class="card">
+  <canvas id="snow"></canvas>
+  <div class="date" id="date"></div>
+  <div class="big" id="num"></div>
+  <div class="label" id="label"></div>
+  <div class="rule"></div>
+  <div class="nudge"><b>today's gentle nudge</b><span id="nudge"></span></div>
+</div>
+<script>
+const now = new Date();
+const day0 = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const today = day0(now), Y = today.getFullYear();
+const diff = d => Math.round((d - today) / 864e5);
+const xmas = new Date(Y, 11, 25), ny = new Date(Y + 1, 0, 1);
+let n, label;
+if (diff(xmas) > 0) { n = diff(xmas); label = n === 1 ? 'sleep till Christmas' : 'sleeps till Christmas'; }
+else if (diff(xmas) === 0) { n = '♡'; label = 'merry Christmas ♡'; }
+else if (diff(ny) > 0) { n = diff(ny); label = n === 1 ? 'day till the new year' : 'days till the new year'; }
+else { const nx = new Date(Y, 11, 25); n = diff(nx); label = 'days till Christmas'; }
+document.getElementById('num').textContent = n;
+document.getElementById('label').textContent = label;
+document.getElementById('date').textContent = now.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long'});
+const nudges = [
+  "Film three hooks for the same idea. Keep the one that makes you lean in.",
+  "Write the post you wish someone had sent you last year.",
+  "Reply to five comments before you publish anything new.",
+  "Batch two reels today. Future you will be grateful.",
+  "One idea, two formats: a reel today, a LinkedIn post tomorrow.",
+  "Open with the moment, not the backstory.",
+  "Check last week's best post. Make a sequel to it.",
+  "Save three references to the Inspo Board. Just save, don't post.",
+  "Record in natural light before 11am.",
+  "End with a question you actually want answered.",
+  "Cut the first line. The second one is usually the real hook.",
+  "Rest is part of the plan. A quiet day still counts.",
+  "Tell one small, specific story from this week.",
+  "Draft the caption before you edit the video."
+];
+const doy = Math.floor((today - new Date(Y,0,0)) / 864e5);
+document.getElementById('nudge').textContent = nudges[doy % nudges.length];
+
+// gentle snowfall
+const c = document.getElementById('snow'), x = c.getContext('2d');
+let W, H, flakes = [];
+function size(){ const r = devicePixelRatio || 1; W = c.clientWidth; H = c.clientHeight; c.width = W*r; c.height = H*r; x.setTransform(r,0,0,r,0,0);
+  flakes = Array.from({length: Math.round(W*H/4500)}, () => ({x: Math.random()*W, y: Math.random()*H, r: .8+Math.random()*2, s: .15+Math.random()*.35, d: Math.random()*6}));}
+function tick(t){ x.clearRect(0,0,W,H);
+  for (const f of flakes){ f.y += f.s; f.x += Math.sin(t/2000 + f.d)*.15; if (f.y > H+4){ f.y = -4; f.x = Math.random()*W; }
+    x.beginPath(); x.arc(f.x, f.y, f.r, 0, 6.283); x.fillStyle = 'rgba(255,255,255,.85)'; x.fill(); }
+  requestAnimationFrame(tick); }
+addEventListener('resize', size); size(); requestAnimationFrame(tick);
+</script>
+</body></html>
